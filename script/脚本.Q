@@ -52,7 +52,6 @@ Dim 首次登录, 首次取仓,首次得到扫拍数量,首次上架,待扫拍数量
 '环境变量
 DimEnv 卡屏, 掉线,领奖结果,cs,c1,c2,envHwnd,envHwnd1
 Call 大漠注册
-Call 初始化
 //这里开始脚本
 Rem 开始脚本
 Call 开始脚本前
@@ -76,7 +75,7 @@ Function 初始化
 End Function
 //初始化数据
 Function 开始脚本前
-    //    Call 结束游戏进程 
+        Call 结束游戏进程 
     //    跳过登录 = 1
     If 角色编号 > 角色数量 Then 
         角色编号 = 1
@@ -237,10 +236,7 @@ Sub 开始
     For s = 1 to 40
         Call Plugin.Msg.Tips("还剩" +cstr(40-s)+"秒")
         If s mod 10 = 0 Then 
-            Call Lib.系统.结束进程("tgp_gamead.exe")
-            Call Lib.系统.结束进程("CrossProxy.exe")
-            Call Lib.系统.结束进程("tgp_render.exe")
-            Call Lib.系统.结束进程("Tencentdl.exe")
+            Call 结束直播进程
         End If
         Delay 1000
     Next
@@ -998,6 +994,8 @@ Function 登录游戏(chanelNumber)//登录的频道名称
     Call 对齐
     res = 默认找字("删除", "ddc593-000000", 300, 300)
     If res(0) = 0 Then 
+    	Delay 2000
+    	Call 结束直播进程
         登录游戏 = 0
         call 打印运行日志("选角色出错")
         Exit Function
@@ -1668,14 +1666,14 @@ End Function
 Function 每日任务
     每日任务 = - 1 
     Call 清屏
-    For 3
+    For 4
         If 换角色(每日任务进度) > 0 Then 
             Goto 换角色完成
         End If
     Next
     Message="账号"&cstr(大区编号) & "角色" & 角色编号 & " 每日任务换角色出错"
     打印运行日志(Message)
-    Exit Function
+    Goto 开始脚本
     Rem 换角色完成
     For 3
         移动结果 = 城内移动(361, 202, 8000, "亚贝罗")
@@ -3254,6 +3252,12 @@ Sub 结束游戏进程
         Call Lib.系统.结束进程("iexplore.exe")
         Delay 1000
     End If
+End Sub
+Sub 结束直播进程
+	Call Lib.系统.结束进程("tgp_gamead.exe")
+    Call Lib.系统.结束进程("CrossProxy.exe")
+    Call Lib.系统.结束进程("tgp_render.exe")
+    Call Lib.系统.结束进程("Tencentdl.exe")
 End Sub
 Function 打码兔答题(left, top, right, bottom)	
     答题=-1
