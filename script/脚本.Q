@@ -52,6 +52,7 @@ Dim 首次登录, 首次取仓,首次得到扫拍数量,首次上架,待扫拍数量
 '环境变量
 DimEnv 卡屏, 掉线,领奖结果,cs,c1,c2,envHwnd,envHwnd1
 Call 大漠注册
+Call 初始化
 //这里开始脚本
 Rem 开始脚本
 Call 开始脚本前
@@ -75,7 +76,7 @@ Function 初始化
 End Function
 //初始化数据
 Function 开始脚本前
-        Call 结束游戏进程 
+//    Call 结束游戏进程 
     //    跳过登录 = 1
     If 角色编号 > 角色数量 Then 
         角色编号 = 1
@@ -522,7 +523,7 @@ Function 扫拍()
             Exit Do//表示超出了装备编号范围
         End If
         If 扫拍数量(numbers(扫拍编号)) <= 0 Then 
-        	扫拍数量(numbers(扫拍编号)) = 0
+            扫拍数量(numbers(扫拍编号)) = 0
             Goto 扫拍下一个
         End If
         Call 单击确认(2)
@@ -994,8 +995,8 @@ Function 登录游戏(chanelNumber)//登录的频道名称
     Call 对齐
     res = 默认找字("删除", "ddc593-000000", 300, 300)
     If res(0) = 0 Then 
-    	Delay 2000
-    	Call 结束直播进程
+        Delay 2000
+        Call 结束直播进程
         登录游戏 = 0
         call 打印运行日志("选角色出错")
         Exit Function
@@ -3254,7 +3255,7 @@ Sub 结束游戏进程
     End If
 End Sub
 Sub 结束直播进程
-	Call Lib.系统.结束进程("tgp_gamead.exe")
+    Call Lib.系统.结束进程("tgp_gamead.exe")
     Call Lib.系统.结束进程("CrossProxy.exe")
     Call Lib.系统.结束进程("tgp_render.exe")
     Call Lib.系统.结束进程("Tencentdl.exe")
