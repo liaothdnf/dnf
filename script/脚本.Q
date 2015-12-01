@@ -519,16 +519,14 @@ Function 扫拍()
         Exit Function
     End If
     xhcs = 0
-    Dim buyAmount
-    buyAmount = 0
     Do While true
         Rem 开始输入名称
         If 扫拍编号 > numbers(0) Then 
             扫拍编号 = 1
             Exit Do//表示超出了装备编号范围
         End If
-        If buyAmount >= 扫拍数量(numbers(扫拍编号)) Then 
-            buyAmount = 0
+        If 扫拍数量(numbers(扫拍编号)) <= 0 Then 
+        	扫拍数量(numbers(扫拍编号)) = 0
             Goto 扫拍下一个
         End If
         Call 单击确认(2)
@@ -691,8 +689,8 @@ Function 扫拍()
                 If res(0) > 0 Then 
                     搜索次数 = 搜索次数+1
                     wcsl 		= wcsl + 1
-                    jianshu 	= jianshu + 1
-                    buyAmount 	= buyAmount + 1
+                    jianshu = jianshu + 1
+                    扫拍数量(numbers(扫拍编号)) = 扫拍数量(numbers(扫拍编号)) - 1
                     qrsl = qrsl + 1
                     Dim log, jiazi
                     jiazi = 装备_得到假紫属性()
@@ -704,8 +702,7 @@ Function 扫拍()
                     Call 打印购买记录(danjia & chr(9) & log)
                     //打印上架记录
                     If 单击确认(2) > 0 Then :qrsl = qrsl + 1:end if
-                    If buyAmount >= 扫拍数量(numbers(扫拍编号)) Then 
-                        buyAmount = 0
+                    If 扫拍数量(numbers(扫拍编号)) <= 0 Then 
                         If jianshu >= 待扫拍数量 Then 
                             扫拍 = jianshu
                             Exit Function
