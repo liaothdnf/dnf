@@ -169,7 +169,7 @@ Function 保存运行信息
         登录次数 = 0
     End If
     If 大区编号 = "" or isnull(大区编号) Then 
-        大区编号 = 1
+        大区编号 = (虚拟机编号-1) * 3 + 1
     End If
     If 角色编号 = "" or isnull(角色编号) Then 
         角色编号 = 1
