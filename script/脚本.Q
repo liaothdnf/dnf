@@ -64,7 +64,7 @@ Function 初始化
 End Function
 //初始化数据
 Function 开始脚本前
-  	跳过登录 = 1
+//  	跳过登录 = 1
 	Call 初始化大区特有配置()
     TracePrint time &" 初始化完成"
     If 角色编号 > 角色数量 Then 
