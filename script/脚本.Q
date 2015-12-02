@@ -634,8 +634,8 @@ Function 扫拍()
             If canBuy = 1 Then 
                 Goto 拍下
             End if
-            Message= "扫拍价格: "& danjia & "自己上架价格: "&upPrice
-            call 打印运行日志(Message) 
+//            Message= "扫拍价格: "& danjia & "自己上架价格: "&upPrice
+//            call 打印运行日志(Message) 
             Rem 不能拍
             装备行数 = 装备行数 + 1
             If 装备行数 > 10 Then 
@@ -1187,7 +1187,7 @@ Function 金币存仓(goldenAmount)
         call 打印运行日志("金币存仓失败")
         Exit Function
     End If
-    res = 识别金币量(cunrux - 120, cunruy , cunrux, cunruy+ 20, "e6c89b-000000",repeatCount, delayTime)
+    res = 识别金币量(cunrux - 120, cunruy , cunrux, cunruy+ 20, "e6c89b-000000",10, 150)
     If res(0) > 0 Then 
         金币存仓 = cdbl(res(1)) 
         Call 清屏
