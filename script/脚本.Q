@@ -56,19 +56,17 @@ Call 初始化
 //这里开始脚本
 Rem 开始脚本
 Call 开始脚本前
-Call 初始化临时修改
 Function 初始化
     配置路径(0) = 0
     Call 初始化运行信息()
     Call 初始化数组信息()
     Call 初始化全局配置()
-    Call 初始化大区特有配置()
-    TracePrint time &" 初始化完成"
 End Function
 //初始化数据
 Function 开始脚本前
-//    Call 结束游戏进程 
-//    跳过登录 = 1
+  	跳过登录 = 1
+	Call 初始化大区特有配置()
+    TracePrint time &" 初始化完成"
     If 角色编号 > 角色数量 Then 
         角色编号 = 1
         大区编号 = 大区编号 + 1
@@ -92,6 +90,17 @@ Function 开始脚本前
     假紫属性 = null
     紫色属性 = null
     蓝色属性 = null
+    If 自定义大区编号 > 0 Then 
+        大区编号=自定义大区编号
+    End If
+    StopThread 卡屏
+    StopThread 领奖结果
+    call 打印运行日志("重新开始登陆") 
+    If 清理角色武器 = 1 Then 
+        Call 清理()
+    Else 
+        Call 开始()
+    End If
 End Function
 Function 初始化运行信息
     跳过登录 	= readConfig("运行信息","跳过登录",1,1)
@@ -182,19 +191,6 @@ Function 保存运行信息
     Call writeConfig("运行信息", "进度编号", 进度编号, 1)
     Call writeConfig("运行信息", "扫拍编号", 扫拍编号, 1)
     Call writeConfig("运行信息", "每日任务进度", 每日任务进度, 1)
-End Function
-Function 初始化临时修改
-    If 自定义大区编号 > 0 Then 
-        大区编号=自定义大区编号
-    End If
-    StopThread 卡屏
-    StopThread 领奖结果
-    call 打印运行日志("重新开始登陆") 
-    If 清理角色武器 = 1 Then 
-        Call 清理()
-    Else 
-        Call 开始()
-    End If
 End Function
 //初始化数据
 //游戏功能类
@@ -386,7 +382,47 @@ Sub 开始
         If 得到扫拍数量() = 1 Then 
             Exit For   		
         End if
-    Next 
+    Next
+    //保证每个角色的金币量
+    For 3
+        Dim Amount
+        Amount = 得到金币携带量((30-待扫拍数量) * 装备平均价值)
+        If Amount > - 1  Then 
+            Call 打印金币携带量(Amount)
+            Dim storeAmount
+            If clng(Amount) >= 预留金币量 + 金币最少存仓量 Then 
+                For 3
+                    storeAmount = 金币存仓(Amount)
+                    If storeAmount > 0 Then 
+                        Call 打印金币储量(storeAmount)
+                        Exit For
+                    End If
+                Next
+            Elseif clng(Amount) >= 预留金币量 then
+                For 3
+                    storeAmount = 金币存仓(100)
+                    If storeAmount > 0 Then 
+                        Call 打印金币储量(storeAmount)
+                        Exit For
+                    End If
+                Next
+            Else 
+            	For 3
+            		If 金币取仓(预留金币量 - clng(Amount) + 10100) > 0 Then 
+            			Exit For
+            		End If
+            	Next
+            	For 3
+                    storeAmount = 金币存仓(100)
+                    If storeAmount > 0 Then 
+                        Call 打印金币储量(storeAmount)
+                        Exit For
+                    End If
+                Next
+            End If
+            Exit for
+        End If
+    next 
     Message = "！！！大区" + cstr(大区编号)&" "&大区名称(大区编号,1)+"角色"+cstr(角色编号)+"开始扫拍"
     Call 打印运行日志(Message)
     Dim result,count
@@ -429,32 +465,6 @@ Sub 开始
     call 打印运行日志(Message)
     goto 开始脚本
     Rem 下一个角色
-    For 3
-        Dim Amount
-        Amount = 得到金币携带量((30-待扫拍数量) * 装备平均价值)
-        If Amount > - 1  Then 
-            Call 打印金币携带量(Amount)
-            Dim storeAmount
-            If clng(Amount) > 预留金币量 + 金币最少存仓量 Then 
-                For 3
-                    storeAmount = 金币存仓(Amount)
-                    If storeAmount > 0 Then 
-                        Call 打印金币储量(storeAmount)
-                        Exit For
-                    End If
-                Next
-            Else 
-                For 3
-                    storeAmount = 金币存仓(100)
-                    If storeAmount > 0 Then 
-                        Call 打印金币储量(storeAmount)
-                        Exit For
-                    End If
-                Next
-            End If
-            Exit for
-        End If
-    next 
     进度编号 = 1
     角色编号 = 角色编号 + 1
     If 角色编号 > 角色数量 Then 
@@ -529,19 +539,24 @@ Function 清理
         dm.MoveTo res(0),res(1)
         Call 双击(3,500)
     End If
-    call 清屏
-        For 3
-            If 清理武器()>0 Then 
-                Exit For
-            End If
-        Next
+    Call 清屏
+    For 2
+    	If 卸下装备() > 0 Then 
+    		Exit For
+    	End If
+    Next
+    For 3
+        If 清理武器()>0 Then 
+            Exit For
+        End If
+    Next
     For 2
         If 魔力结晶存仓()>0 Then 
             Exit For
         End If
     Next
     角色编号 = 角色编号 + 1
-    If 角色编号 > 每日任务角色数量(大区编号,1) Then 
+    If 角色编号 > 角色数量 Then 
         goto 开始脚本
     Else 
         For 5
@@ -606,7 +621,7 @@ Function 清理武器
     For hang = 1 To 3
         For lie = 1 To 8
             Delay 10
-            If lie mod 3 = 1 Then 
+            If lie mod 2 = 1 Then 
                 dm.moveto csx, csy
                 Call 双击(2,延时)
             End If
@@ -924,6 +939,38 @@ Function 打开物品栏并整理
             Exit Function
         End If
     Next    
+End Function
+Function 卸下装备()
+	卸下装备 = -1
+	If 打开物品栏并整理() < 1 Then 
+		Exit Function
+	End If
+	Dim zb(10)
+	zb(0) = 9
+	zb(1) = "491,110"
+	zb(2) = "522,113"
+	zb(3) = "489,142"
+	zb(4) = "521,146"
+	zb(5) = "486,175"
+	zb(6) = "664,111"
+	zb(7) = "661,144"
+	zb(8) = "693,142"
+	zb(9) = "694,176"
+	Dim i
+	For i = 1 To zb(0)
+		Dim arr
+		arr = split(zb(i), ",", - 1 , 1)
+		For 2
+			Call 定位
+			dm.moveto clng(arr(0)), clng(arr(1))
+			Delay 延时 * 6
+			For 4
+				dm.rightclick 
+				Delay 延时
+			Next 
+		Next
+	Next
+	卸下装备 = 1
 End Function
 Function 打开拍卖行
     Dim res
@@ -1365,10 +1412,6 @@ Function 金币存仓(goldenAmount)
     End If
 End Function
 Function 金币取仓(goldenAmount)	
-    If goldenAmount < 0 Then 
-        金币取仓 = 0
-        Exit Function	
-    End If
     金币取仓 = -1
     Call 清屏
     Dim res
@@ -1463,6 +1506,9 @@ Function 取仓
     For hang = 1 To 2
         For lie = 1 To 8
             dm.moveto jinkux + lie * 30, jinkuy + hang * 30
+            If 清理角色武器 = 1 Then 
+            	Goto 开始取仓
+            End If
             If 装备_初始化() < 1 Then 
                 Goto 不必取仓
             End If
@@ -1470,10 +1516,12 @@ Function 取仓
                 Goto 不必取仓
             End If
             Rem 开始取仓
-//            TracePrint "取仓"
-            Call 定位
-            dm.moveto jinkux + lie * 30, jinkuy + hang * 30
-            Call 双击(4, 延时*5)
+            For 2
+            	Call 定位
+            	dm.moveto jinkux + lie * 30, jinkuy + hang * 30
+            	Delay 4*延时
+            	Call 双击(4, 延时)
+            Next 
             Rem 不必取仓
         Next
     Next
@@ -2305,11 +2353,6 @@ Function 装备_是否存仓()
 End Function
 Function 装备_是否取仓()
     装备_是否取仓 = 1 - 装备_是否存仓()
-    If 清理角色武器 = 1 Then 
-     	If 装备_是否无法交易() = 1 or 装备_是否是神器() = 1 or 装备_是否已强化()=1 or 装备_得到品级()=0 Then 
-     		装备_是否取仓 = 1
-     	End If
-    End If
 End Function
 Function 装备_是否是神器
     装备_是否是神器 = 0
@@ -3189,7 +3232,6 @@ Function readConfig(section,key,todouble,path)//读取配置文件，section:小节的名字
     End If
 End Function
 Sub OnScriptExit()
-    Call 开始脚本前()
     call 保存运行信息()
 End Sub
 //文件配置相关
@@ -3338,13 +3380,13 @@ Function 打印变换记录(log)
 End Function
 Sub 打印金币储量(amount)
     Dim path,log
-    path = getLogPath("金币记录", "金币储量")
+    path = getLogPath("金币记录", "金币储量.log")
     log = 大区名称(大区编号, 1) & "-" & 角色编号 & chr(9) & amount
     Call writeLog(path,log)
 End Sub
 Sub 打印金币携带量(amount)
     Dim path,log
-    path = getLogPath("金币记录", "金币携带量")
+    path = getLogPath("金币记录", "金币携带量.log")
     log = 大区名称(大区编号, 1) & "-" & 角色编号 & chr(9) & amount
     call writeLog(path, log)
 End Sub
