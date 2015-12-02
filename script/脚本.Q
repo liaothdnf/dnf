@@ -283,7 +283,7 @@ Sub 开始
                 //TracePrint 每日任务进度
             End If
             xhcs = xhcs + 1
-            If xhcs > 25 Then 
+            If xhcs > 20 Then 
                 Message="账号"+cstr(大区编号)&" "&大区名称(大区编号,1)+"每日任务完成时出错"
                 打印运行日志(Message)
                 每日任务进度 = 每日任务角色数量(大区编号,1)+1
@@ -386,7 +386,8 @@ Sub 开始
     //保证每个角色的金币量
     For 3
         Dim Amount
-        Amount = 得到金币携带量((30-待扫拍数量) * 装备平均价值)
+        Amount = 得到金币携带量((30 - 待扫拍数量) * 装备平均价值)
+//        TracePrint Amount
         If Amount > - 1  Then 
             Call 打印金币携带量(Amount)
             Dim storeAmount
@@ -1396,7 +1397,16 @@ Function 金币存仓(goldenAmount)
                 Exit For
             End If
         Next 
-        输入文本(cstr(goldenAmount))
+        For 4
+        	Dim num
+        	输入文本 (cstr(goldenAmount))
+        	Call 定位
+        	Delay 5*延时
+        	num = dm.ocr(0, 0, 800, 600, "ffe3ab-000000", 1.0)
+        	If find(num, cstr(goldenAmount)) > 0 Then 
+        		Exit For
+        	End If
+        Next 
         Call 按键(3, 13, 延时)
         Call 按键(3, 27, 500)
         Call 清屏
@@ -1411,7 +1421,11 @@ Function 金币存仓(goldenAmount)
         Exit Function
     End If
 End Function
-Function 金币取仓(goldenAmount)	
+Function 金币取仓(goldenAmount)
+	If goldenAmount <= 0 Then 
+		 金币取仓 = 1
+		 Exit Function
+	End If
     金币取仓 = -1
     Call 清屏
     Dim res
@@ -1449,7 +1463,17 @@ Function 金币取仓(goldenAmount)
                 Exit For
             End If
         Next 
-        输入文本(cstr(goldenAmount))
+        For 4
+        	Dim num
+        	输入文本 (cstr(goldenAmount))
+        	Call 定位
+        	Delay 5*延时
+        	num = dm.ocr(0, 0, 800, 600, "ffe3ab-000000", 1.0)
+//        	TracePrint num
+        	If find(num, cstr(goldenAmount)) > 0 Then 
+        		Exit For
+        	End If
+        Next 
         Call 按键(3,13,延时)
         金币取仓 = 1
         Call 按键(3,27,500)
@@ -2114,7 +2138,7 @@ Function 得到金币携带量(baseAmount)
     //    TracePrint res(0)
     If res(0) > 0 and isnumeric(res(1)) = - 1  Then 
         得到金币携带量 = cdbl(res(1)) + baseAmount
-        TracePrint 得到金币携带量
+//        TracePrint 得到金币携带量
         Exit Function
     End If 
 End Function
