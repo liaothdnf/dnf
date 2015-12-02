@@ -64,7 +64,6 @@ Function 初始化
 End Function
 //初始化数据
 Function 开始脚本前
-//  	跳过登录 = 1
 	Call 初始化大区特有配置()
     TracePrint time &" 初始化完成"
     If 角色编号 > 角色数量 Then 
@@ -90,6 +89,7 @@ Function 开始脚本前
     假紫属性 = null
     紫色属性 = null
     蓝色属性 = null
+    
     If 自定义大区编号 > 0 Then 
         大区编号=自定义大区编号
     End If
@@ -163,6 +163,29 @@ Function 初始化大区特有配置
     End If
 End Function
 Function 保存运行信息
+	If 角色编号 > 角色数量 Then 
+        角色编号 = 1
+        大区编号 = 大区编号 + 1
+    End If
+    If 大区编号 > 大区数量 Then 
+        大区编号 = 1
+    End If
+    Dim lowAreaNumber, highAreaNumber
+    lowAreaNumber 	= (虚拟机编号 - 1) * 3 + 1
+    highAreaNumber 	= (虚拟机编号 - 1) * 3 + 3
+    If 大区编号 < lowAreaNumber  or 大区编号 > highAreaNumber Then 
+        大区编号 = lowAreaNumber
+    End If
+    StopThread 卡屏
+    StopThread 领奖结果
+    首次登录 = 1
+    首次取仓 = 1
+    首次得到扫拍数量 = 1
+    首次上架 = 1
+    装备属性 = null
+    假紫属性 = null
+    紫色属性 = null
+    蓝色属性 = null
     If 跳过登录 = "" or isnull(跳过登录) Then 
         跳过登录 = 0
     End If
