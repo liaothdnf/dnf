@@ -59,25 +59,16 @@ Call 开始脚本前
 Call 初始化临时修改
 Function 初始化
     配置路径(0) = 0
-    //    TracePrint time
     Call 初始化运行信息()
     Call 初始化数组信息()
     Call 初始化全局配置()
     Call 初始化大区特有配置()
-    //    For i = 1 To 装备名称(0, 0)
-    //    	level 	= readConfig("装备-" & i, "等级", 1, 2)
-    //    	leixing = readConfig("装备-" & i, "类型", 1, 2)
-    //    	call writeConfig("装备-" & i,"扫拍数量",2,2)
-    //    	If level > 70 and( leixing = "布甲" or leixing = "轻甲" or leixing = "重甲" or leixing = "板甲" or leixing = "皮甲") then
-    // 			call writeConfig("装备-" & i,"扫拍数量",0,2)
-    // 		end if   		
-    //    Next
     TracePrint time &" 初始化完成"
 End Function
 //初始化数据
 Function 开始脚本前
 //    Call 结束游戏进程 
-    //    跳过登录 = 1
+//    跳过登录 = 1
     If 角色编号 > 角色数量 Then 
         角色编号 = 1
         大区编号 = 大区编号 + 1
@@ -157,8 +148,9 @@ Function 初始化大区特有配置
     不购买强化装备 	= readConfig("基础", "不购买强化装备", 1, 2)
     角色数量 		= readConfig("基础", "角色数量", 1, 2)
     是否扫上级 = readConfig("基础", "是否扫上级", 1, 2)
-    If isnull(角色数量) Then 
-        角色数量 = 5
+    If isnull(角色数量) or isnull(是否扫上级) or isnull(不购买强化装备) or isnull(扫拍时是否排序) Then 
+        Call 打印运行日志("初始化配置出错")
+        EndScript
     End If
 End Function
 Function 保存运行信息
@@ -480,6 +472,184 @@ Sub 开始
     打印运行日志(Message)
     goto 开始脚本    
 End Sub
+Function 清理
+    Dim message
+	If 跳过登录 = 1 Then 
+        跳过登录  = 0
+        Goto 开始清理
+    End If
+    Do while true
+        登录结果 = 登录游戏(频道编号)
+        If 登录结果 > 0 Then 
+            登录次数 = 0
+            登录失败次数=0
+            Exit Do
+        Else 
+            登录次数 = 登录次数 + 1
+        End If
+        If 登录次数 > 5 Then 
+            登录失败次数 = 登录失败次数 + 1
+            If 登录失败次数 > 2 Then 
+                message = "登录出现异常"
+                Call 发送运行日志(message)
+                打印运行日志(message)
+                登录失败次数 = 0
+            End If
+            登录次数 = 0
+            大区编号 = 大区编号 + 1
+            每日任务进度 = 1
+            角色编号 = 1
+            进度编号 = 1
+            扫拍编号 = 1
+            登录次数 = 0          
+            跳过登录 = 0
+        End If
+        goto 开始脚本
+    Loop
+    For s = 1 to 40
+        Call Plugin.Msg.Tips("还剩" +cstr(40-s)+"秒")
+        If s mod 10 = 0 Then 
+            Call 结束直播进程
+        End If
+        Delay 1000
+    Next
+    ksx = 310
+    ksy = 235
+    For 3
+        dm.moveto ksx, ksy
+        Delay 200
+        Call 双击(2, 500)
+        dm.moveto 470, 355
+    Next
+    Rem 开始清理
+    Message="账号"+cstr(大区编号)+" 角色"+cstr(角色编号) + "开始清理"
+    打印运行日志 (Message)
+    res = 默认找字("关闭", "ddc593-000000", 10, 150)
+    If res(0) > 0 Then  
+        dm.MoveTo res(0),res(1)
+        Call 双击(3,500)
+    End If
+    call 清屏
+        For 3
+            If 清理武器()>0 Then 
+                Exit For
+            End If
+        Next
+    For 2
+        If 魔力结晶存仓()>0 Then 
+            Exit For
+        End If
+    Next
+    角色编号 = 角色编号 + 1
+    If 角色编号 > 每日任务角色数量(大区编号,1) Then 
+        goto 开始脚本
+    Else 
+        For 5
+            If 换角色(角色编号) > 0 Then 
+                Goto 开始清理
+            End If
+        Next
+        Goto 开始脚本
+    End If
+End Function
+Function 清理武器
+    清理武器 = - 1 
+    Dim xhcs,successCount,clearCount,res
+    xhcs = 0
+    successCount = 0
+    clearCount=0
+    For 2
+        If 取仓() >= 0 Then 
+            goto 清理前取仓完成
+        End If
+    Next
+    Call 打印运行日志("清理失败")
+    Exit Function
+    rem 清理前取仓完成
+    For 2
+        If 收邮件() = 1 Then 
+            Exit For
+        End If
+    Next
+    Call 对齐
+    Rem 清理开始处
+    clearCount = clearCount + 1
+    If clearCount > 10 Then 
+        Call 打印运行日志("清理失败")
+        Exit Function
+    End If
+    Call 清屏
+    dm.moveto 433, 253
+    Call 单击(1, 延时 * 2)
+    res=默认找字("商店", "e6c89b-000000", 10, 100)
+    If res(0) > 0 Then 
+        dm.moveto res(1), res(2)
+        Call 双击(6, 延时)
+    Else 
+		TracePrint "没有找到商店"
+        goto 清理开始处
+    End If
+    res = 默认找字("整理", "ddc593-000000", 10, 100)
+    If res(0) > 0 Then 
+        dm.moveto res(1)-180, res(2)-235
+        Call 双击(3, 延时)
+        dm.moveto res(1), res(2)
+        Call 双击(1, 4000)
+        csx = res(1) - 434
+        csy = res(2) + 27
+    Else 
+        Exit Function
+    End If
+    qidianx = 455
+    qidiany = 240
+    saleCount = 0
+    For hang = 1 To 3
+        For lie = 1 To 8
+            Delay 10
+            If lie mod 3 = 1 Then 
+                dm.moveto csx, csy
+                Call 双击(2,延时)
+            End If
+            If hang = 1 and lie = 3 Then 
+                Call 检查安全模式
+            End If
+            dm.moveto qidianx + lie * 30, qidiany + hang * 30
+            If 装备_初始化() < 1 Then 
+                Goto 出售完成
+            End If
+            If find(装备属性,"无法交易|武器|普通|高级") > 0 Then  
+                Goto 清理该物品
+            End If
+            If 不购买强化装备 = 1 and 装备_是否已强化() = 1 Then 
+                Goto 清理该物品
+            End If
+            If 是否扫上级 = 1 and 装备_得到品级 = 0 Then 
+                Goto 清理该物品
+            Else 
+                goto 清理下一个
+            End If
+            Rem 清理该物品
+            Call 定位
+            dm.moveto qidianx + lie * 30, qidiany + hang * 30
+            Call 双击(6, 延时)
+            saleCount=saleCount+1
+            Rem 清理下一个
+        Next
+    Next
+    Rem 出售完成
+    Call 清屏
+    If saleCount < 2 Then 
+        successCount = successCount + 1
+        If successCount > 1 Then 
+            清理武器 = 1
+            Exit Function
+        Else 
+            goto 清理开始处
+        End If
+    Else 
+        goto 清理开始处 
+    End If
+End Function
 Function 得到扫拍装备编号
     Dim res(100), i, index, size
     size = 0
@@ -1282,8 +1452,10 @@ Function 取仓
     End If
     res = 默认找字("取出", "ddc593-000000", 10, 100)
     If res(0) > 0 Then 
+    	dm.moveto res(1) - 5,res(2) - 30
+    	Call 双击(4,延时*10)
         dm.MoveTo res(1),res(2)
-        Call 双击(3,200)
+        Call 双击(4,延时*5)
     Else 
         TracePrint "failed"
         Exit Function
@@ -1298,7 +1470,10 @@ Function 取仓
                 Goto 不必取仓
             End If
             Rem 开始取仓
-            Call 双击(1, 200)
+//            TracePrint "取仓"
+            Call 定位
+            dm.moveto jinkux + lie * 30, jinkuy + hang * 30
+            Call 双击(4, 延时*5)
             Rem 不必取仓
         Next
     Next
@@ -1769,25 +1944,27 @@ Function 城内移动(zbx,zby,ys,npcName)
 End Function
 Function 收邮件
     Dim xhcs
-    收邮件 = -1 
-    Call 清屏
-    dm.keypress 27
-    Delay 600
+    收邮件 = - 1
+  	Dim openCount
+  	openCount = 0
+    Rem 开始打开邮箱
+    openCount = openCount + 1
+    If openCount > 5 Then 
+    	Exit Function
+    End If
     res = 找字并按键("游戏菜单","ffffff-000000",10,500,27)
     If res(0) < 1 Then 
         Exit Function
     End if
     call 定位
-    Delay 500
     dm.MoveTo 400, 250
-    Call 双击(1,延时)
-    res = 默认找字("全部接收", "ddc593-000000", 15, 200)
+    Call 单击(1,延时)
+    res = 默认找字("全部接收", "ddc593-000000", 10, 200)
     If res(0) > 0 Then 
         qbjsx = res(1) + 56
         qbjsy = res(2) + 10
     Else 
-        Call 清屏
-        Exit Function
+        Goto 开始打开邮箱
     End if
     For 10
         dm.moveto qbjsx, qbjsy
@@ -2035,8 +2212,8 @@ Function 装备_初始化2(name)
     Dim shuxing
     shuxing = 识别装备属性2()
     If shuxing(0) > 0 Then 
-        装备属性 = shuxing(1) & name
-        假紫属性 = shuxing(2)
+        装备属性 = shuxing(1)
+        假紫属性 = shuxing(2)&name
         紫色属性 = shuxing(3)
         蓝色属性 = shuxing(4)
         装备_初始化2 = 1
@@ -2083,7 +2260,7 @@ Function 装备_得到短语()
     装备_得到短语 = null
     Dim number
     For number = 1 To cdbl(装备短语_名称(0, 0))
-        If find(装备属性, 装备短语_名称(number, 1)) > 0 Then 
+        If find(假紫属性, 装备短语_名称(number, 1)) > 0 Then 
             装备_得到短语 = 装备短语_名称(number, 0)
             Exit Function
         End If
@@ -2118,30 +2295,21 @@ Function 装备_是否存仓()
     If isnull(装备_得到类型()) Then 
         Exit Function
     End If
-    If find(装备属性, "无法交易") > 0 Then 
+    If 装备_是否无法交易() > 0 Then 
         Exit Function
     End If
-    If 是否扫上级 = 1 Then 
-        If find(装备属性, "上级") < 1 Then 
+    If 是否扫上级 = 1 and 装备_得到品级() = 0 then 
             Exit Function
-        End If
     End If
     装备_是否存仓 = 0
 End Function
 Function 装备_是否取仓()
-    装备_是否取仓 = 0
-    If isnull(装备_得到类型()) Then 
-        Exit Function
+    装备_是否取仓 = 1 - 装备_是否存仓()
+    If 清理角色武器 = 1 Then 
+     	If 装备_是否无法交易() = 1 or 装备_是否是神器() = 1 or 装备_是否已强化()=1 or 装备_得到品级()=0 Then 
+     		装备_是否取仓 = 1
+     	End If
     End If
-    If find(装备属性, "无法交易") > 0 Then 
-        Exit Function
-    End If
-    If 是否扫上级 = 1 Then 
-        If find(装备属性, "上级") < 1 Then 
-            Exit Function
-        End If
-    End If
-    装备_是否取仓 = 1	
 End Function
 Function 装备_是否是神器
     装备_是否是神器 = 0
@@ -2541,14 +2709,14 @@ Function 识别装备属性()
     repeatCount = 3
     delayTime = 延时
     res(0) = 0
-    Delay 10 * 延时
-    xiyou = 默认找字("稀有", "b36bff-000000", 2, 延时)
-    fengzhuang = 默认找字("封装", "ffffff-000000", 2, 延时)    
+    Delay 8 * 延时
+    xiyou = 默认找字("稀有", "b36bff-000000", 5, 延时)
+    fengzhuang = 默认找字("封装", "ffffff-000000", 5, 延时)    
     If xiyou(0) > 0 and fengzhuang(0) > 0Then 
-        leftx = xiyou(1) - 220
+        leftx = xiyou(1) - 200
         lefty = xiyou(2) - 100
-        rightx = xiyou(1) + 40
-        righty = xiyou(2) + 320
+        rightx = xiyou(1) + 30
+        righty = xiyou(2) + 300
     Else 
         识别装备属性 = res
         Exit Function
@@ -2572,11 +2740,10 @@ Function 识别装备属性()
     dm_ret = dm.Ocr(leftx,lefty,rightx,righty,"ffffff-000000|ff00ff-000000|ff3232-000000|68d5ed-000000|808080-000000|b36bff-000000|fff000-000000", 1.0)
     dm_ret2 = dm.Ocr(leftx,lefty,rightx,righty, "b36bff-000000|68d5ed-000000", 1.0)
     dm_ret3 = dm.Ocr(leftx,lefty,rightx,righty, "b36bff-000000", 1.0)
-    dm_ret4 = dm.Ocr(leftx,lefty,rightx,righty, "68d5ed-000000", 1.0)
+    dm_ret4 = dm.Ocr(leftx, lefty, rightx, righty, "68d5ed-000000", 1.0)
     Dim i
     For i = 1 To 装备名称(0, 0)
-        If find(dm_ret, 装备名称(i, 1)) > 0 Then 
-            //    		TracePrint 装备名称(i, 1)
+        If find(dm_ret3, 装备名称(i, 1)) > 0 Then 
             res(0) = 1
             res(1) = dm_ret
             res(2) = dm_ret2
@@ -2588,7 +2755,7 @@ Function 识别装备属性()
     Next
     If 首次识别 = 1 Then 
         首次识别 = 0
-        Delay 3000
+        Delay 2000
         Goto 开始识别属性
     End If
     识别装备属性 = res	
@@ -2603,10 +2770,10 @@ Function 识别装备属性2()
     xiyou = 默认找字("稀有", "b36bff-000000", 2, 延时)
     fengzhuang = 默认找字("封装", "ffffff-000000", 2, 延时)    
     If xiyou(0) > 0 and fengzhuang(0) > 0Then 
-        leftx = xiyou(1) - 220
+        leftx = xiyou(1) - 200
         lefty = xiyou(2) - 100
-        rightx = xiyou(1) + 40
-        righty = xiyou(2) + 320
+        rightx = xiyou(1) + 30
+        righty = xiyou(2) + 300
     Else 
         识别装备属性2 = res
         Exit Function
@@ -2635,85 +2802,7 @@ Function 识别装备属性2()
     res(4) = dm_ret4
     识别装备属性2 = res
 End Function
-Function 清理
-    Dim message
-    Call 结束游戏进程
-    Do while true
-        登录结果 = 登录游戏(频道编号)
-        If 登录结果 > 0 Then 
-            登录次数 = 0
-            登录失败次数=0
-            Exit Do
-        Else 
-            登录次数 = 登录次数 + 1
-        End If
-        If 登录次数 > 5 Then 
-            登录失败次数 = 登录失败次数 + 1
-            If 登录失败次数 > 2 Then 
-                message = "登录出现异常"
-                Call 发送运行日志(message)
-                打印运行日志(message)
-                登录失败次数 = 0
-            End If
-            登录次数 = 0
-            大区编号 = 大区编号 + 1
-            每日任务进度 = 1
-            角色编号 = 1
-            进度编号 = 1
-            登录次数 = 0          
-            跳过登录 = 0
-        End If
-        goto 开始脚本
-    Loop
-    For 3
-        Call Lib.系统.结束进程("CrossProxy.exe")
-        Delay 2000
-    Next 
-    For 秒数 = 1 to 20
-        Call Plugin.Msg.Tips("还剩" +cstr(10-秒数)+"秒")
-        Delay 1000
-    Next
-    ksx = 310
-    ksy = 235
-    For 3
-        dm.moveto ksx, ksy
-        Delay 200
-        Call 双击(2, 500)
-        dm.moveto 470, 355
-    Next
-    Rem 开始清理
-    Message="账号"+cstr(大区编号)+" 角色"+cstr(角色编号)
-    打印运行日志 (Message)
-    res = 默认找字("关闭", "ddc593-000000", 10, 300)
-    If res(0) > 0 Then  
-        Delay 200
-        dm.MoveTo res(0),res(1)
-        Delay 200
-        Call 双击(3,500)
-    End If
-    Call 按键(3, 27, 1000)
-    //    For 3
-    //        If 清理武器()>0 Then 
-    //            Exit For
-    //        End If
-    //    Next
-    For 2
-        If 魔力结晶存仓()>0 Then 
-            Exit For
-        End If
-    Next
-    角色编号 = 角色编号 + 1
-    If 角色编号 > 每日任务角色数量(大区编号,1) Then 
-        goto 开始脚本
-    Else 
-        For 5
-            If 换角色(角色编号) > 0 Then 
-                Goto 开始清理
-            End If
-        Next
-        Goto 开始脚本
-    End If
-End Function
+
 Function 上架(jiage, x, y)
     TracePrint jiage
     上架 = -1
@@ -2843,101 +2932,7 @@ Function 上架(jiage, x, y)
     Loop
     上架 = 1
 End Function
-Function 清理武器
-    清理武器 = - 1 
-    Dim xhcs,successCount,clearCount,res
-    xhcs = 0
-    successCount = 0
-    clearCount=0
-    Rem 清理开始处
-    clearCount = clearCount + 1
-    If clearCount > 20 Then 
-        Call 打印运行日志("清理失败")
-        Exit Function
-    End If
-    For 3
-        If 取仓() >= 0 Then 
-            goto 清理前取仓完成
-        End If
-    Next
-    Call 打印运行日志("清理失败")
-    Exit Function
-    rem 清理前取仓完成
-    For 2
-        If 收邮件() = 1 Then 
-            Exit For
-        End If
-    Next
-    Call 对齐
-    Call 清屏
-    dm.moveto 433, 253
-    Call 双击(1, 延时*2)
-    res=默认找字("魔法封印", "e6c89b-000000", 10, 100)
-    If res(0) > 0 Then 
-        dm.moveto res(1), res(2)
-        Call 双击(6, 延时)
-    Else 
-        Exit Function
-    End If
-    call 定位
-    res = 默认找字("整理", "ddc593-000000", 10, 100)
-    If res(0) > 0 Then 
-        dm.moveto res(1)-180, res(2)-235
-        Call 双击(3, 延时)
-        dm.moveto res(1), res(2)
-        Call 双击(1, 4000)
-        csx = res(1) - 434
-        csy = res(2) + 27
-    Else 
-        Exit Function
-    End If
-    qidianx = 455
-    qidiany = 240
-    saleCount = 0
-    For hang = 1 To 3
-        For lie = 1 To 8
-            Delay 10
-            If lie mod 2 = 1 Then 
-                dm.moveto csx, csy
-                Call 双击(3,延时)
-            End If
-            If hang = 1 and lie = 3 Then 
-                Call 检查安全模式
-            End If
-            dm.moveto qidianx + lie * 30, qidiany + hang * 30
-            If 装备_初始化() < 1 Then 
-                Goto 出售完成
-            End If
-            If find(装备属性,"无法交易|武器|普通|高级") > 0 Then  
-                Goto 清理该物品
-            End If
-            If 不购买强化装备 = 1 and 装备_是否已强化() = 1 Then 
-                Goto 清理该物品
-            End If
-            If 是否扫上级 = 1 and 装备_得到品级 = 0 Then 
-                Goto 清理该物品
-            Else 
-                清理下一个
-            End If
-            Rem 清理该物品
-            Call 双击(4, 300)
-            saleCount=saleCount+1
-            Rem 清理下一个
-        Next
-    Next
-    Rem 出售完成
-    If saleCount < 2 Then 
-        successCount = successCount + 1
-        If successCount > 1 Then 
-            清理武器 = 1
-            Exit Function
-        Else 
-            goto 清理开始处
-        End If
-    Else 
-        goto 清理开始处 
-    End If
-End Function
+
 Function 换角色(js)
     Dim xhcs,res
     call 对齐
