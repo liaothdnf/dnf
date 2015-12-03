@@ -64,7 +64,7 @@ Function 初始化
 End Function
 //初始化数据
 Function 开始脚本前
-	Call 初始化大区特有配置()
+    Call 初始化大区特有配置()
     TracePrint time &" 初始化完成"
     If 角色编号 > 角色数量 Then 
         角色编号 = 1
@@ -89,7 +89,6 @@ Function 开始脚本前
     假紫属性 = null
     紫色属性 = null
     蓝色属性 = null
-    
     If 自定义大区编号 > 0 Then 
         大区编号=自定义大区编号
     End If
@@ -163,7 +162,7 @@ Function 初始化大区特有配置
     End If
 End Function
 Function 保存运行信息
-	If 角色编号 > 角色数量 Then 
+    If 角色编号 > 角色数量 Then 
         角色编号 = 1
         大区编号 = 大区编号 + 1
     End If
@@ -410,7 +409,7 @@ Sub 开始
     For 3
         Dim Amount
         Amount = 得到金币携带量((30 - 待扫拍数量) * 装备平均价值)
-//        TracePrint Amount
+        //        TracePrint Amount
         If Amount > - 1  Then 
             Call 打印金币携带量(Amount)
             Dim storeAmount
@@ -431,12 +430,12 @@ Sub 开始
                     End If
                 Next
             Else 
-            	For 3
-            		If 金币取仓(预留金币量 - clng(Amount) + 10100) > 0 Then 
-            			Exit For
-            		End If
-            	Next
-            	For 3
+                For 3
+                    If 金币取仓(预留金币量 - clng(Amount) + 10100) > 0 Then 
+                        Exit For
+                    End If
+                Next
+                For 3
                     storeAmount = 金币存仓(100)
                     If storeAmount > 0 Then 
                         Call 打印金币储量(storeAmount)
@@ -508,7 +507,7 @@ Sub 开始
 End Sub
 Function 清理
     Dim message
-	If 跳过登录 = 1 Then 
+    If 跳过登录 = 1 Then 
         跳过登录  = 0
         Goto 开始清理
     End If
@@ -565,9 +564,9 @@ Function 清理
     End If
     Call 清屏
     For 2
-    	If 卸下装备() > 0 Then 
-    		Exit For
-    	End If
+        If 卸下装备() > 0 Then 
+            Exit For
+        End If
     Next
     For 3
         If 清理武器()>0 Then 
@@ -625,7 +624,7 @@ Function 清理武器
         dm.moveto res(1), res(2)
         Call 双击(6, 延时)
     Else 
-		TracePrint "没有找到商店"
+        TracePrint "没有找到商店"
         goto 清理开始处
     End If
     res = 默认找字("整理", "ddc593-000000", 10, 100)
@@ -654,7 +653,7 @@ Function 清理武器
             End If
             dm.moveto qidianx + lie * 30, qidiany + hang * 30
             If 装备_初始化() < 1 Then 
-                Goto 出售完成
+                Goto 清理该物品
             End If
             If find(装备属性,"无法交易|武器|普通|高级") > 0 Then  
                 Goto 清理该物品
@@ -843,8 +842,8 @@ Function 扫拍()
             If canBuy = 1 Then 
                 Goto 拍下
             End if
-//            Message= "扫拍价格: "& danjia & "自己上架价格: "&upPrice
-//            call 打印运行日志(Message) 
+            //            Message= "扫拍价格: "& danjia & "自己上架价格: "&upPrice
+            //            call 打印运行日志(Message) 
             Rem 不能拍
             装备行数 = 装备行数 + 1
             If 装备行数 > 10 Then 
@@ -965,36 +964,36 @@ Function 打开物品栏并整理
     Next    
 End Function
 Function 卸下装备()
-	卸下装备 = -1
-	If 打开物品栏并整理() < 1 Then 
-		Exit Function
-	End If
-	Dim zb(10)
-	zb(0) = 9
-	zb(1) = "491,110"
-	zb(2) = "522,113"
-	zb(3) = "489,142"
-	zb(4) = "521,146"
-	zb(5) = "486,175"
-	zb(6) = "664,111"
-	zb(7) = "661,144"
-	zb(8) = "693,142"
-	zb(9) = "694,176"
-	Dim i
-	For i = 1 To zb(0)
-		Dim arr
-		arr = split(zb(i), ",", - 1 , 1)
-		For 2
-			Call 定位
-			dm.moveto clng(arr(0)), clng(arr(1))
-			Delay 延时 * 6
-			For 4
-				dm.rightclick 
-				Delay 延时
-			Next 
-		Next
-	Next
-	卸下装备 = 1
+    卸下装备 = -1
+    If 打开物品栏并整理() < 1 Then 
+        Exit Function
+    End If
+    Dim zb(10)
+    zb(0) = 9
+    zb(1) = "491,110"
+    zb(2) = "522,113"
+    zb(3) = "489,142"
+    zb(4) = "521,146"
+    zb(5) = "486,175"
+    zb(6) = "664,111"
+    zb(7) = "661,144"
+    zb(8) = "693,142"
+    zb(9) = "694,176"
+    Dim i
+    For i = 1 To zb(0)
+        Dim arr
+        arr = split(zb(i), ",", - 1 , 1)
+        For 2
+            Call 定位
+            dm.moveto clng(arr(0)), clng(arr(1))
+            Delay 延时 * 6
+            For 4
+                dm.rightclick 
+                Delay 延时
+            Next 
+        Next
+    Next
+    卸下装备 = 1
 End Function
 Function 打开拍卖行
     Dim res
@@ -1301,16 +1300,51 @@ End Sub
 Function 魔力结晶存仓
     If 角色编号 = 金币存放角色 Then 
         For 3
-            If 金币取仓(110000000) > 0 Then 
+            If 金币取仓(310000000) > 0 Then 
                 Exit For
             End If
         Next
     Else 
         For 3
-            If 金币存仓(51000000) > 0 Then 
-                Exit For
+            Dim Amount
+            Amount = 得到金币携带量(2000000)
+            //        TracePrint Amount
+            If Amount > - 1  Then 
+                Call 打印金币携带量(Amount)
+                Dim storeAmount
+                If clng(Amount) >= 预留金币量 + 金币最少存仓量 Then 
+                    For 3
+                        storeAmount = 金币存仓(Amount)
+                        If storeAmount > 0 Then 
+                            Call 打印金币储量(storeAmount)
+                            Exit For
+                        End If
+                    Next
+                Elseif clng(Amount) >= 预留金币量 then
+                    For 3
+                        storeAmount = 金币存仓(100)
+                        If storeAmount > 0 Then 
+                            Call 打印金币储量(storeAmount)
+                            Exit For
+                        End If
+                    Next
+                Else 
+                    For 3
+                        If 金币取仓(预留金币量 - clng(Amount) + 10100) > 0 Then 
+                            Exit For
+                        End If
+                    Next
+                    For 3
+                        storeAmount = 金币存仓(100)
+                        If storeAmount > 0 Then 
+                            Call 打印金币储量(storeAmount)
+                            Exit For
+                        End If
+                    Next
+                End If
+                Exit for
             End If
-        Next	
+        next 	
     End If
     魔力结晶存仓=-1
     Dim xhcs, xhcs2,res
@@ -1421,14 +1455,14 @@ Function 金币存仓(goldenAmount)
             End If
         Next 
         For 4
-        	Dim num
-        	输入文本 (cstr(goldenAmount))
-        	Call 定位
-        	Delay 5*延时
-        	num = dm.ocr(0, 0, 800, 600, "ffe3ab-000000", 1.0)
-        	If find(num, cstr(goldenAmount)) > 0 Then 
-        		Exit For
-        	End If
+            Dim num
+            输入文本 (cstr(goldenAmount))
+            Call 定位
+            Delay 5*延时
+            num = dm.ocr(0, 0, 800, 600, "ffe3ab-000000", 1.0)
+            If find(num, cstr(goldenAmount)) > 0 Then 
+                Exit For
+            End If
         Next 
         Call 按键(3, 13, 延时)
         Call 按键(3, 27, 500)
@@ -1445,10 +1479,10 @@ Function 金币存仓(goldenAmount)
     End If
 End Function
 Function 金币取仓(goldenAmount)
-	If goldenAmount <= 0 Then 
-		 金币取仓 = 1
-		 Exit Function
-	End If
+    If goldenAmount <= 0 Then 
+        金币取仓 = 1
+        Exit Function
+    End If
     金币取仓 = -1
     Call 清屏
     Dim res
@@ -1487,15 +1521,15 @@ Function 金币取仓(goldenAmount)
             End If
         Next 
         For 4
-        	Dim num
-        	输入文本 (cstr(goldenAmount))
-        	Call 定位
-        	Delay 5*延时
-        	num = dm.ocr(0, 0, 800, 600, "ffe3ab-000000", 1.0)
-//        	TracePrint num
-        	If find(num, cstr(goldenAmount)) > 0 Then 
-        		Exit For
-        	End If
+            Dim num
+            输入文本 (cstr(goldenAmount))
+            Call 定位
+            Delay 5*延时
+            num = dm.ocr(0, 0, 800, 600, "ffe3ab-000000", 1.0)
+            //        	TracePrint num
+            If find(num, cstr(goldenAmount)) > 0 Then 
+                Exit For
+            End If
         Next 
         Call 按键(3,13,延时)
         金币取仓 = 1
@@ -1542,8 +1576,8 @@ Function 取仓
     End If
     res = 默认找字("取出", "ddc593-000000", 10, 100)
     If res(0) > 0 Then 
-    	dm.moveto res(1) - 5,res(2) - 30
-    	Call 双击(4,延时*10)
+        dm.moveto res(1) - 5,res(2) - 30
+        Call 双击(4,延时*10)
         dm.MoveTo res(1),res(2)
         Call 双击(4,延时*5)
     Else 
@@ -1554,7 +1588,7 @@ Function 取仓
         For lie = 1 To 8
             dm.moveto jinkux + lie * 30, jinkuy + hang * 30
             If 清理角色武器 = 1 Then 
-            	Goto 开始取仓
+                Goto 开始取仓
             End If
             If 装备_初始化() < 1 Then 
                 Goto 不必取仓
@@ -1564,10 +1598,10 @@ Function 取仓
             End If
             Rem 开始取仓
             For 2
-            	Call 定位
-            	dm.moveto jinkux + lie * 30, jinkuy + hang * 30
-            	Delay 4*延时
-            	Call 双击(4, 延时)
+                Call 定位
+                dm.moveto jinkux + lie * 30, jinkuy + hang * 30
+                Delay 4*延时
+                Call 双击(4, 延时)
             Next 
             Rem 不必取仓
         Next
@@ -2040,12 +2074,12 @@ End Function
 Function 收邮件
     Dim xhcs
     收邮件 = - 1
-  	Dim openCount
-  	openCount = 0
+    Dim openCount
+    openCount = 0
     Rem 开始打开邮箱
     openCount = openCount + 1
     If openCount > 5 Then 
-    	Exit Function
+        Exit Function
     End If
     res = 找字并按键("游戏菜单","ffffff-000000",10,500,27)
     If res(0) < 1 Then 
@@ -2161,7 +2195,7 @@ Function 得到金币携带量(baseAmount)
     //    TracePrint res(0)
     If res(0) > 0 and isnumeric(res(1)) = - 1  Then 
         得到金币携带量 = cdbl(res(1)) + baseAmount
-//        TracePrint 得到金币携带量
+        //        TracePrint 得到金币携带量
         Exit Function
     End If 
 End Function
@@ -2394,7 +2428,7 @@ Function 装备_是否存仓()
         Exit Function
     End If
     If 是否扫上级 = 1 and 装备_得到品级() = 0 then 
-            Exit Function
+        Exit Function
     End If
     装备_是否存仓 = 0
 End Function
@@ -2892,7 +2926,6 @@ Function 识别装备属性2()
     res(4) = dm_ret4
     识别装备属性2 = res
 End Function
-
 Function 上架(jiage, x, y)
     TracePrint jiage
     上架 = -1
@@ -3022,7 +3055,6 @@ Function 上架(jiage, x, y)
     Loop
     上架 = 1
 End Function
-
 Function 换角色(js)
     Dim xhcs,res
     call 对齐
