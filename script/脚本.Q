@@ -3840,4 +3840,26 @@ Function 截图(path)
     Call Plugin.Pic.PrintScreen(0, 0, 800, 600, filePath)
     TracePrint filePath
 End Function
+Function 写入角色数量
+	Dim num, fileIndex,count
+	count = 0
+	fileIndex = 1
+	For i = 1 To 大区数量
+		count = count + 1
+		If count > 3 Then 
+			count = 1
+			fileIndex = fileIndex + 1
+		End If
+//		TracePrint fileIndex
+		If 每日任务角色数量(i, 1) > 8 Then 
+			num = 8
+		ElseIf 每日任务角色数量(i, 1) > 5 Then
+			num = 每日任务角色数量(i, 1)
+		Else 
+			num = 5
+		End If
+		Call Plugin.File.WriteINI("基础", "角色数量",cstr(num), "D:\DNF\" & fileIndex & "\" & i &".ini")
+	Next
+
+End Function
 //轮子类
