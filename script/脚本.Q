@@ -563,11 +563,11 @@ Function 清理
         Call 双击(3,500)
     End If
     Call 清屏
-    For 2
-        If 卸下装备() > 0 Then 
-            Exit For
-        End If
-    Next
+//    For 2
+//        If 卸下装备() > 0 Then 
+//            Exit For
+//        End If
+//    Next
     For 3
         If 清理武器()>0 Then 
             Exit For
@@ -641,13 +641,10 @@ Function 清理武器
     qidianx = 455
     qidiany = 240
     saleCount = 0
-    For hang = 1 To 3
+    For hang = 1 To 2
         For lie = 1 To 8
-            Delay 10
-            If lie mod 2 = 1 Then 
-                dm.moveto csx, csy
-                Call 双击(2,延时)
-            End If
+            dm.moveto csx, csy
+            Call 双击(4,延时)
             If hang = 1 and lie = 3 Then 
                 Call 检查安全模式
             End If
