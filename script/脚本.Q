@@ -1437,8 +1437,7 @@ Function 金币存仓(goldenAmount)
     If goldenAmount > 预留金币量 Then 
         goldenAmount = goldenAmount - 预留金币量
     Else 
-        金币存仓 = 1
-        Exit Function
+        goldenAmount = 100
     End If
     金币存仓 = -1
     Call 清屏
