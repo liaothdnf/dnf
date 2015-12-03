@@ -669,8 +669,6 @@ Function 清理武器
     saleCount = 0
     For hang = 1 To 4
         For lie = 1 To 8
-            dm.moveto csx, csy
-            Call 双击(4,延时)
             If hang = 1 and lie = 3 Then 
                 Call 检查安全模式
             End If
@@ -692,6 +690,8 @@ Function 清理武器
                 goto 清理下一个
             End If
             Rem 清理该物品
+            dm.moveto csx, csy
+            Call 双击(4,延时)
             Call 定位
             dm.moveto qidianx + lie * 30, qidiany + hang * 30
             Call 双击(6, 延时)
