@@ -591,7 +591,7 @@ Function 清理
         End If
     Next
     For 3
-        If 清理武器()>0 Then 
+        If 清理武器() > 0 Then 
             Exit For
         End If
     Next
@@ -606,6 +606,11 @@ Function 清理
     Else 
         For 3
             If 换角色(角色编号) > 0 Then 
+            	For 2
+            		If 存仓() > 0 Then 
+            			Exit For
+            		End If
+            	Next
                 Goto 开始清理
             End If
         Next
@@ -657,7 +662,7 @@ Function 清理武器
     qidianx = 455
     qidiany = 240
     saleCount = 0
-    For hang = 1 To 3
+    For hang = 1 To 4
         For lie = 1 To 8
             dm.moveto csx, csy
             Call 双击(4,延时)
@@ -1605,6 +1610,10 @@ Function 取仓
             If wupin(0) < 1 Then 
             	Goto 取仓完毕
            	ElseIf wupin(0) < 5 Then
+           		If 清理角色武器 = 1 Then 
+            		Goto 开始取仓
+            	End If
+            
            		Goto 不必取仓
             End If
             
@@ -1714,7 +1723,7 @@ End Function
 Function 变换前()
     //    TracePrint "变换前"
     变换前 = - 1 
-    Dim xhcs, res, cuncangx(100), cuncangy(100)
+    Dim xhcs, res
     cuncangx(0) = 0
     If 打开物品栏并整理() < 1 Then 
         call 打印运行日志("打开物品栏并整理失败-变换前失败")
@@ -1727,40 +1736,12 @@ Function 变换前()
             call 按键(1,27,500)
             Exit Function
         End If
-    Next 
-    hang = 1
-    lie = 1
-    qidianx = 455
-    qidiany = 240
-    For hang = 1 To 4
-        For lie = 1 To 8
-            dm.moveto qidianx + lie * 30, qidiany + hang * 30
-            Dim wupin
-            wupin = 装备_初始化("")
-            If wupin(0) < 5 Then 
-            	Goto 开始存仓
-           	End If
-            If 装备_是否存仓() < 1 Then 
-                Goto 不必存仓
-            End If
-            Rem 开始存仓
-            cuncangx(0) = cuncangx(0) + 1
-            cuncangx(cuncangx(0)) = qidianx + lie * 30
-            cuncangy(cuncangx(0)) = qidiany + hang * 30
-            Rem 不必存仓
-        Next
     Next
-    rem 存仓完毕   
-    xhcs = 0
-    Do While 存仓(cuncangx, cuncangy) < 1
-        xhcs = xhcs + 1
-        If xhcs > 2 Then 
-            变换前 = - 1 
-            call 打印运行日志("存仓失败-变换前失败")
-            Call 按键(1,27,500)
-            Exit Function
-        End If
-    Loop
+    If 存仓() < 1 Then 
+    	call 打印运行日志("存仓失败-变换前失败")
+        Call 清屏
+        Exit Function
+    End If 
     Call 清屏
     If 打开物品栏并整理() < 1 Then 
         call 打印运行日志("打开物品栏并整理失败-变换前失败")
@@ -1952,8 +1933,35 @@ Function 解除魔法封印
     Rem 解除完封印
     解除魔法封印 = 1
 End Function
-Function 存仓(x, y)
-    Dim xhcs,xhcs2,res
+Function 存仓()
+	存仓 = - 1 
+	If 打开物品栏并整理() < 1 Then 
+		Exit Function
+	End If
+	Dim x(100), y(100),hang,lie,qidianx,qidiany
+    hang = 1
+    lie = 1
+    qidianx = 455
+    qidiany = 240
+    For hang = 1 To 4
+        For lie = 1 To 8
+            dm.moveto qidianx + lie * 30, qidiany + hang * 30
+            Dim wupin
+            wupin = 装备_初始化("")
+            If wupin(0) < 5 Then 
+            	Goto 开始存仓
+           	End If
+            If 装备_是否存仓() < 1 Then 
+                Goto 不必存仓
+            End If
+            Rem 开始存仓
+            x(0) = x(0) + 1
+            x(x(0)) = qidianx + lie * 30
+            y(x(0)) = qidiany + hang * 30
+            Rem 不必存仓
+        Next
+    Next
+    rem 存仓完毕   
     If clng(x(0)) = 0 Then 
         存仓 = 1
         Exit Function
@@ -1966,7 +1974,7 @@ Function 存仓(x, y)
         Call 双击(3,500)
     Else 
         call 打印运行日志("存仓失败")
-        存仓 = 0
+        存仓 = -1
         Exit Function
     End If
     If 首次取仓 = 1 Then 
@@ -1985,14 +1993,15 @@ Function 存仓(x, y)
         Call 双击(3,500)
     Else 
         call 打印运行日志("存仓失败")
-        存仓 = 0
+        存仓 = -1
         Exit Function
     End If
     For i = 1 To clng(x(0))
         dm.moveto x(i), y(i)
-        Call 双击(2,100)
+        Delay 2*延时
+        Call 双击(4,延时)
     Next
-    Call 按键(3,27,500) 
+    Call 清屏
     存仓 = 1
 End Function
 Function 每日任务
@@ -2355,13 +2364,13 @@ Function 装备_初始化(name)
         假紫属性 = shuxing(2)
         紫色属性 = shuxing(3)
         蓝色属性 = shuxing(4)
-        装备_初始化 = shuxing(0)
+        装备_初始化 = shuxing
     Else 
         装备属性 = null
         假紫属性 = null
         紫色属性 = null
         蓝色属性 = null
-        装备_初始化 = shuxing(0)
+        装备_初始化 = shuxing
     End If
 End Function
 
@@ -3111,7 +3120,7 @@ Function 换角色(js)
         dm.MoveTo res(1),res(2)
         Call 双击(5,300)
     End If
-    res = 默认找字("亡者峡谷", "e6c89b-000000", 100, 150)
+    res = 默认找字("亡者峡谷", "e6c89b-000000", 100, 250)
     If res(0) > 0 Then 
         换角色 = 1
         首次得到扫拍数量 = 1
