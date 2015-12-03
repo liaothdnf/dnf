@@ -622,6 +622,7 @@ Function 清理武器
     Dim xhcs,successCount,clearCount,res
     xhcs = 0
     successCount = 0
+    clearCount = 0
     For 2
         If 取仓() >= 0 Then 
             goto 清理前取仓完成
@@ -637,6 +638,10 @@ Function 清理武器
     Next
     Call 对齐
     Rem 清理开始处
+    clearCount = clearCount + 1
+    If clearCount > 2 Then 
+    	Exit Function
+    End If
     Call 清屏
     dm.moveto 433, 253
     Call 单击(1, 延时 * 2)
@@ -2856,22 +2861,19 @@ Function 识别物品属性(name)
 //			4	是假紫封装并且可以交易但是不在装备列表
 //			5 	是假紫封装并且可以交易并且在装备列表
     Dim xh, res(10),kg,suoding,xiyou,wufa
-    repeatCount = 3
-    delayTime = 延时
-    Delay 10 * 延时
+    Delay 8 * 延时
     Dim 首次识别
     首次识别 = 1
     Rem 开始识别属性
     res(0) = 0
-    
-    kg = 默认找字("kg", "ffffff-000000", 1, 延时)
+    kg = 默认找字("kg", "ffffff-000000", 12, 延时)
     If kg(0) > 0 Then 
     	res(0) = res(0) + 1
     Else 
      	识别物品属性 = res
     	Exit Function
     End If
-    suoding = 默认找字("交易锁定", "fff000-000000", 1, 延时)
+    suoding = 默认找字("交易锁定", "fff000-000000", 2, 延时)
     If suoding(0) > 0 Then 
     	res(0) = res(0) + 1
     Else 
@@ -2879,14 +2881,14 @@ Function 识别物品属性(name)
     	Exit Function	
     End If
     
-    xiyou = 默认找字("稀有", "b36bff-000000", 1, 延时)
+    xiyou = 默认找字("稀有", "b36bff-000000", 2, 延时)
     If xiyou(0) > 0 Then 
     	res(0) = res(0) + 1
     Else 
      	识别物品属性 = res
     	Exit Function
     End If
-    wufa = 默认找字("无法交易", "808080-000000", 1, 延时)
+    wufa = 默认找字("无法交易", "808080-000000", 2, 延时)
     If wufa(0) = 0 Then 
     	res(0) = res(0) + 1
     Else 
