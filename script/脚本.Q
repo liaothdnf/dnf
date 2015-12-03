@@ -449,7 +449,7 @@ Sub 开始
             Exit for
         End If
     next 
-    Message = "！！！大区" + cstr(大区编号)&" "&大区名称(大区编号,1)+"角色"+cstr(角色编号)+"开始扫拍"
+    Message = "大区" + cstr(大区编号)&" "&大区名称(大区编号,1)+"角色"+cstr(角色编号)+"开始扫拍"
     Call 打印运行日志(Message)
     Dim result,count
     result = 0:count = 0
@@ -458,20 +458,20 @@ Sub 开始
         Dim buyResult
         buyResult = 扫拍()
         If buyResult <= -99 Then
-            Message = "！！！大区" + cstr(大区编号)&" "&大区名称(大区编号,1)+"角色"+cstr(角色编号)+"！无法竞拍"
+            Message = "大区" + cstr(大区编号)&" "&大区名称(大区编号,1)+"角色"+cstr(角色编号)+"！无法竞拍"
             call 打印运行日志(Message)
             Goto 下一个角色
         End If
         result = buyResult + result
         TracePrint result
     Loop
-    Message = "！！！大区" + cstr(大区编号)&" "&大区名称(大区编号,1)+"角色"+cstr(角色编号)+"结束扫拍"
+    Message = "大区" + cstr(大区编号)&" "&大区名称(大区编号,1)+"角色"+cstr(角色编号)+"结束扫拍"
     call 打印运行日志(Message)
     //这里扫拍
     进度编号 = 进度编号 + 1
     Rem 进度5
     //这里变换
-    Message = "！！！大区" + cstr(大区编号)&" "&大区名称(大区编号,1)+"角色"+cstr(角色编号)+"开始变换"
+    Message = "大区" + cstr(大区编号)&" "&大区名称(大区编号,1)+"角色"+cstr(角色编号)+"开始变换"
     call 打印运行日志(Message)
     Dim transCount
     transCount = 0
@@ -487,7 +487,7 @@ Sub 开始
             goto 进度1
         End If
     Next
-    Message = "！！！大区" + cstr(大区编号)&" "&大区名称(大区编号,1)+"角色"+cstr(角色编号)+"变换次数过多，重新登录"
+    Message = "大区" + cstr(大区编号)&" "&大区名称(大区编号,1)+"角色"+cstr(角色编号)+"变换次数过多，重新登录"
     call 打印运行日志(Message)
     goto 开始脚本
     Rem 下一个角色
@@ -562,7 +562,7 @@ Function 清理
         For 3
             If 换角色(4) > 0 Then 
                 For 2
-                    If 魔力结晶存仓()>0 Then 
+                    If 魔力结晶存仓() > 0 Then 
                         Exit For
                     End If
                 Next
@@ -590,7 +590,7 @@ Function 清理
             Exit For
         End If
     Next
-    For 3
+    For 2
         If 清理武器() > 0 Then 
             Exit For
         End If
@@ -1430,7 +1430,7 @@ Function 魔力结晶存仓
         call 打印运行日志("魔力结晶存仓失败")
         Exit Function
     End If
-    Call 按键(3,27,500) 
+    Call 清屏
     魔力结晶存仓 = 1
 End Function
 Function 金币存仓(goldenAmount)
@@ -1953,7 +1953,9 @@ Function 存仓()
             dm.moveto qidianx + lie * 30, qidiany + hang * 30
             Dim wupin
             wupin = 装备_初始化("")
-            If wupin(0) < 5 Then 
+            If wupin(0) < 1 Then 
+            	Goto 存仓完毕
+            ElseIf wupin(0) < 5 Then
             	Goto 开始存仓
            	End If
             If 装备_是否存仓() < 1 Then 
@@ -2860,21 +2862,21 @@ Function 识别物品属性(name)
 //			3	是假紫封装但是不可交易
 //			4	是假紫封装并且可以交易但是不在装备列表
 //			5 	是假紫封装并且可以交易并且在装备列表
-    Dim xh, res(10),kg,suoding,xiyou,wufa
-    Delay 8 * 延时
+    Dim xh, res(10),paixu,jiaoyi,xiyou,wufa
+    Delay 6 * 延时
     Dim 首次识别
     首次识别 = 1
     Rem 开始识别属性
     res(0) = 0
-    kg = 默认找字("kg", "ffffff-000000", 12, 延时)
-    If kg(0) > 0 Then 
+    paixu = 默认找字("排序锁定", "fff000-000000", 12, 延时)
+    If paixu(0) > 0 Then 
     	res(0) = res(0) + 1
     Else 
      	识别物品属性 = res
     	Exit Function
     End If
-    suoding = 默认找字("交易锁定", "fff000-000000", 2, 延时)
-    If suoding(0) > 0 Then 
+    jiaoyi = 默认找字("交易锁定", "fff000-000000", 2, 延时)
+    If jiaoyi(0) > 0 Then 
     	res(0) = res(0) + 1
     Else 
      	识别物品属性 = res
